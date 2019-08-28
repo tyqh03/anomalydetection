@@ -1,0 +1,47 @@
+/**
+ * Document: MaxCompiler Tutorial (maxcompiler-tutorial.pdf)
+ * Chapter: 12      Example: 3      Name: Dualport mapped ROM
+ * MaxFile name: DualPortMappedRom
+ * Summary:
+ *       Kernel design that demonstrates the use of a dual port mapped ROM.
+ */
+
+package dualportmappedrom;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelParameters;
+import com.maxeler.maxcompiler.v2.kernelcompiler.stdlib.memory.Memory;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
+import com.maxeler.maxcompiler.v2.utils.MathUtils;
+import com.maxeler.maxcompiler.v2.kernelcompiler.stdlib.KernelMath;
+
+class DualPortMappedRomKernel extends Kernel {
+	DualPortMappedRomKernel(KernelParameters parameters) {
+		super(parameters);
+
+		
+		DFEVar x = io.input("in_x", dfeFloat(8,24));
+		DFEVar y = io.input("in_y", dfeFloat(8,24));
+
+		Memory<DFEVar> mappedRom_x = mem.alloc(dfeFloat(8,24), 16);
+		mappedRom_x.mapToCPU("mappedRom_x");
+		Memory<DFEVar> mappedRom_y = mem.alloc(dfeFloat(8,24), 16);
+		mappedRom_y.mapToCPU("mappedRom_y");
+		
+		DFEVar min_distance=constant.var(dfeFloat(8,24),Integer.MAX_VALUE);
+		int addrBits = MathUtils.bitsToAddress(16);
+        for(int i=0;i<16;i++){
+            DFEVar read=constant.var(dfeUInt(addrBits),i);
+            
+        	DFEVar centroid_x = mappedRom_x.read(read);
+        	DFEVar centroid_y = mappedRom_y.read(read);
+        	
+        	DFEVar distance=KernelMath.sqrt((centroid_y - y) * (centroid_y - y) + (centroid_x - x) * (centroid_x - x));
+        	min_distance=distance<min_distance?distance:min_distance;
+        }
+
+		// Output
+
+		io.output("result", min_distance, dfeFloat(8,24));
+	}
+}

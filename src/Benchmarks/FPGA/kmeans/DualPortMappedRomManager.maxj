@@ -1,0 +1,27 @@
+/**
+ * Document: MaxCompiler Tutorial (maxcompiler-tutorial.pdf)
+ * Chapter: 12      Example: 3      Name: Dualport mapped ROM
+ * MaxFile name: DualPortMappedRom
+ * Summary:
+ *       Manager for a dual port mapped ROM kernel design.
+ *   All IO is between the CPU and the DFE.
+ */
+package dualportmappedrom;
+
+import com.maxeler.maxcompiler.v2.build.EngineParameters;
+import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
+import com.maxeler.maxcompiler.v2.managers.standard.Manager;
+import com.maxeler.maxcompiler.v2.managers.standard.Manager.IOType;
+
+class DualPortMappedRomManager {
+
+
+	public static void main(String[] args) {
+		Manager m = new Manager(new EngineParameters(args));
+		Kernel k = new DualPortMappedRomKernel(m.makeKernelParameters());
+		m.setKernel(k);
+		m.setIO(IOType.ALL_CPU);
+		m.createSLiCinterface();
+		m.build();
+	}
+}
